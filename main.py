@@ -10,7 +10,7 @@ start server
 
 """
 
-import numpy
+from lib.q_learning import QLearning
 import sys
 import re
 import json
@@ -18,9 +18,6 @@ import urllib2
 
 #HOST="http://2048.semantics3.com"
 HOST="http://0.0.0.0:8080"
-
-def predict_next(state):
-    return numpy.random.randint(4, size=1)[0]
 
 def api_game_start():
     response = urllib2.urlopen(HOST+'/hi/start/json')
@@ -33,42 +30,45 @@ def api_move(session_id, move):
     return json.loads(response.read() )
 
 def print_state(turn, data):
-    info = '\r turn:%s, score:%s' % (turn, data['score'])
+    info = '\r                           turn:%s, score:%s' % (turn, data['score'])
     sys.stdout.write(info)
     sys.stdout.flush()
 
-def play():
+
+def play(ql_obj):
 
     start_data = api_game_start()
 
-    # game start
-    print "game start"
-    print "session id : ", start_data['session_id']
+    # # game start
+    # print "game start"
+    # print "session id : ", start_data['session_id']
 
     # game start
     session_id = start_data['session_id']
     grid      = start_data['grid']
 
-    turn = 0
+    turn   = 0
     result = []
     while(1):
 
         # find next move
-        move = predict_next(grid)
+        move, q_value = ql_obj.predict_next(grid, greedy=True)
 
-        result.append({'grid':grid, 'move':move})
 
         # move
         data = api_move(session_id, move)
-        grid = data['grid']
+        result.append({'grid':grid, 'action':move, 'point':data['points'], 'agrid': data['grid']})
 
-        # move
+        grid  = data['grid']
+
+
+        # 状況表示と終了判定
         print_state(turn, data)
         #print move, data['grid']
-
+        #if  data['over'] or turn > 10:
         if  data['over']:
             print
-            print data
+            #print data
             break
 
         turn += 1
@@ -77,9 +77,21 @@ def play():
 
 
 def main():
-    result = play()
-    #print result
 
+    # ダミー変数化のため, [0, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]
+    # 入力素子数は, 16×14
+    ql_obj =  QLearning(16 * 14, 4)
+
+    for i in range(10000):
+        result = play(ql_obj)
+
+        # Q-learning
+        ql_obj.train(result)
+
+        # print weight
+        data =[[0,0,0,2], [0,0,0,2], [0,0,0,2], [0,0,0,2]]
+        output_vec= ql_obj.get_q_values(data)
+        print output_vec
 
 if __name__ == '__main__':
     main()
