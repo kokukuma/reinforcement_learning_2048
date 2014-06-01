@@ -15,6 +15,7 @@ import sys
 import re
 import json
 import urllib2
+import numpy
 
 #HOST="http://2048.semantics3.com"
 HOST="http://0.0.0.0:8080"
@@ -73,25 +74,30 @@ def play(ql_obj):
 
         turn += 1
 
-    return result
+    return data['score'] , result
 
 
 def main():
 
     # ダミー変数化のため, [0, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]
-    # 入力素子数は, 16×14
-    ql_obj =  QLearning(16 * 14, 4)
+    # 入力素子数は, 16×14にされる.
+    ql_obj =  QLearning(16, 4, dummy=False)
 
+    max_score = 0
+    score_list = []
     for i in range(10000):
-        result = play(ql_obj)
+
+        score, result = play(ql_obj)
 
         # Q-learning
         ql_obj.train(result)
 
+        score_list.append(score)
+
         # print weight
-        data =[[0,0,0,2], [0,0,0,2], [0,0,0,2], [0,0,0,2]]
+        data =[[0,0,0,0], [0,0,0,0], [0,0,0,2], [0,0,0,2]]
         output_vec= ql_obj.get_q_values(data)
-        print output_vec
+        print i, numpy.mean(score_list) , max(score_list), output_vec
 
 if __name__ == '__main__':
     main()

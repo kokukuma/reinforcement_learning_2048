@@ -90,15 +90,15 @@ class MultiLayerNeuralNetwork(OutputFunciton, BackPropagationLogic):
 
         error_hist = []
 
-        print
-        print 'START TRAINING'
+        # print
+        # print 'START TRAINING'
         while True:
             error_list = []
             loop_num  += 1
 
-            # ループ毎に学習係数を減少させる.
-            self.learning_coefficient = self.start_learning_coef * (1 - (float(loop_num)/self.epoch_limit) ** 2)
-            self.learning_coefficient = self.learning_coefficient if self.start_learning_coef * 0.001 < self.learning_coefficient else self.start_learning_coef * 0.001
+            # # ループ毎に学習係数を減少させる.
+            # self.learning_coefficient = self.start_learning_coef * (1 - (float(loop_num)/self.epoch_limit) ** 2)
+            # self.learning_coefficient = self.learning_coefficient if self.start_learning_coef * 0.001 < self.learning_coefficient else self.start_learning_coef * 0.001
 
             # # シードが同じなので, 同じ形にばらされる.
             # # あってもなくても. 収束の仕方はかわるが..
@@ -197,17 +197,27 @@ class MultiLayerNeuralNetwork(OutputFunciton, BackPropagationLogic):
             moment  = 0.
 
 
+            #print "=========="
             if layer_num == 0:
                 # 入力層は重みなしのため, 更新もない.
                 continue
 
             elif layer_num == self.total_layer_num-1:
                 # 出力層の重みを更新
-                deleta_mat = self.delta_for_output_layer(output_vec, predict_vec)
+                #print output_vec, predict_vec
+                if self.output_function_type == 2:
+                    # 出力層の関数を線形にした場合.
+                    #deleta_mat = self.delta_for_output_layer_linear(output_vec, predict_vec)
+                    deleta_mat = self.delta_for_output_layer(output_vec, predict_vec)
+                else:
+                    deleta_mat = self.delta_for_output_layer(output_vec, predict_vec)
+                #print deleta_mat
+
                 # print '---------------'
                 # print deleta_mat.T.shape
                 # print pre_layer_predict_vec.shape
                 # print np.dot(deleta_mat.T, pre_layer_predict_vec).shape
+
                 weight_mat = weight_mat - self.learning_coefficient * np.dot(deleta_mat.T , pre_layer_predict_vec ) / self.mini_batch
                 weights[layer_num] = weight_mat
 
@@ -220,6 +230,12 @@ class MultiLayerNeuralNetwork(OutputFunciton, BackPropagationLogic):
                 #predict_vec      = np.insert(predict_vec,[0],[1.0])
                 predict_vec      = np.insert(predict_vec,0,1.0,axis=1)
 
+                # if self.output_function_type == 2:
+                #     deleta_mat = self.delta_for_middle_layer_linear(next_layer_weight_mat, next_deleta_vec)
+                #     deleta_mat = deleta_mat[:,1:]
+                # else:
+                #     deleta_mat = self.delta_for_middle_layer(next_layer_weight_mat, next_deleta_vec, predict_vec)
+                #     deleta_mat = deleta_mat[:,1:]
                 deleta_mat = self.delta_for_middle_layer(next_layer_weight_mat, next_deleta_vec, predict_vec)
                 deleta_mat = deleta_mat[:,1:]
 
@@ -256,10 +272,11 @@ class MultiLayerNeuralNetwork(OutputFunciton, BackPropagationLogic):
             input_vec = np.insert(input_vec, 0, 1.0, axis=1)
 
             net_value_vec = np.dot(weight_mat, input_vec.T).T
-            if idx == self.total_layer_num - 1 and self.output_function_type == 2:
-                output_vec = net_value_vec
+            if idx == self.total_layer_num - 1 and  self.output_function_type == 2:
+                #output_vec = net_value_vec
+                output_vec = self.sigmoid_function_tmp(net_value_vec, limit=1)
 
-            if idx == self.total_layer_num - 1 and self.output_function_type == 1:
+            elif idx == self.total_layer_num - 1 and self.output_function_type == 1:
                 output_vec = self.softmax_function(net_value_vec)
 
             else:
@@ -297,12 +314,12 @@ def test_multilayer_perceptron():
         return data
 
     import matplotlib.pyplot as plt
-    mlnn = MultiLayerNeuralNetwork( [2, 5, 1],
+    mlnn = MultiLayerNeuralNetwork( [2, 1],
                                     threshold=0.1,
-                                    learning_coefficient=0.5,
+                                    start_learning_coef=0.5,
                                     sigmoid_alpha=10,
                                     mini_batch=10,
-                                    output_function_type=0)
+                                    output_function_type=2)
 
     x_range = [0,1]
     y_range = [0,1]

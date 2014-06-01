@@ -34,6 +34,10 @@ class OutputFunciton(object):
         return e / npres
 
     @classmethod
+    def sigmoid_function_tmp(self, net_value_vec, alpha=5, limit=1):
+        return limit / (1 + np.exp(- net_value_vec * alpha))         ## 一番正しいやつ.
+
+    @classmethod
     def sigmoid_function(self, net_value_vec, alpha=5):
         # ## vectorize
         # def _sigmoid(x_value, alpha):
