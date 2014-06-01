@@ -1,0 +1,14 @@
+*.py[cod]
+*.txt
+Rakefile
+data/package.db
+config.json
+vec_data
+co_data
+vec_data_cp
+*.lprof
+*.png
+jawiki
+jawiki_ori
+wikipedia/
+wordvec.bin
