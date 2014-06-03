@@ -33,8 +33,12 @@ def play(agent):
 
         if grid == data['grid']:
             agent.giveReward(numpy.array([-50]))
+            rand_move = numpy.random.randint(4, size=1)[0]
+            data = api_move(session_id, rand_move)
         else:
             agent.giveReward(numpy.array([data['points']]))
+
+        turn += 1
         grid = data['grid']
 
         print_state(turn, data)
@@ -64,6 +68,7 @@ def main():
         #     with open('./agent.dump') as f:
         #         agent = pickle.load(f)
 
+        print i, 'playing ...'
         score = play(agent)
         score_list.append(score)
 
@@ -72,18 +77,22 @@ def main():
         #   pybrain/rl/learners/valuebased/q.py
         #   => learnerをQからNFQにしたら行けた.
         #   => http://stackoverflow.com/questions/23755927/pybrain-training-a-actionvaluenetwork-doesnt-properly-work
+        print i, 'learning ...'
         agent.learn()
         agent.reset()
 
+        print i, 'evaluate sample ...'
         data =[[0,0,0,0], [0,0,0,0], [0,0,0,2], [0,0,0,2]]
         agent.integrateObservation(numpy.array(data).ravel())
         move = agent.getAction()
-        print i, int(numpy.mean(score_list)) , max(score_list), move
+        print "                           ",i, int(numpy.mean(score_list)) , max(score_list), move
 
-        with open('./agent.dump', 'w') as f:
-            pickle.dump(agent, f)
-        with open('./score.dump', 'w') as f:
-            pickle.dump(score_list, f)
+        if i % 20 == 0:
+            print i, 'saving ...'
+            with open('./agent.dump', 'w') as f:
+                pickle.dump(agent, f)
+            with open('./score.dump', 'w') as f:
+                pickle.dump(score_list, f)
 
 if __name__ == '__main__':
     main()
