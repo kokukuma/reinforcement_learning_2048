@@ -1,9 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import pickle
 from scipy import * #@UnusedWildImport
 import pylab
 import numpy
+import os
 
 #from pybrain.rl.environments.mazes import Maze, MDPMazeTask
 from pybrain.rl.learners.valuebased import ActionValueTable, ActionValueNetwork
@@ -58,6 +60,10 @@ def main():
 
     score_list = []
     for i in range(10000):
+        # if os.path.exists('./agent.dump'):
+        #     with open('./agent.dump') as f:
+        #         agent = pickle.load(f)
+
         score = play(agent)
         score_list.append(score)
 
@@ -72,7 +78,12 @@ def main():
         data =[[0,0,0,0], [0,0,0,0], [0,0,0,2], [0,0,0,2]]
         agent.integrateObservation(numpy.array(data).ravel())
         move = agent.getAction()
-        print i, numpy.mean(score_list) , max(score_list), move
+        print i, int(numpy.mean(score_list)) , max(score_list), move
+
+        with open('./agent.dump', 'w') as f:
+            pickle.dump(agent, f)
+        with open('./score.dump', 'w') as f:
+            pickle.dump(score_list, f)
 
 if __name__ == '__main__':
     main()
