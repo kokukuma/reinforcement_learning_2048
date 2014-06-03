@@ -26,6 +26,13 @@ def api_game_start():
     session_id = start_data['session_id']
     return  start_data
 
+def api_simple_game_start():
+    #print HOST+'/hi/start/size/2/tiles/2/victory/4/rand/4/json'
+    response = urllib2.urlopen(HOST+'/hi/start/size/3/tiles/2/victory/13/rand/2/json')
+    start_data=json.loads(response.read() )
+    session_id = start_data['session_id']
+    return  start_data
+
 def api_move(session_id, move):
     response = urllib2.urlopen(HOST+'/hi/state/%s/move/%s/json' % (session_id, move))
     return json.loads(response.read() )
