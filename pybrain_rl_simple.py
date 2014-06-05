@@ -23,6 +23,7 @@ def play(agent):
     session_id = start_data['session_id']
     grid      = start_data['grid']
 
+    next_point  = 100
     turn   = 0
     result = []
     while(1):
@@ -39,6 +40,16 @@ def play(agent):
             data = api_move(session_id, numpy.random.randint(4, size=1)[0])
         else:
             agent.giveReward(numpy.array([data['points']]))
+
+            # # 100 point 毎に報酬を付与するやり方.
+            # if next_point < data['score']:
+            #     print 'get point'
+            #     agent.giveReward(numpy.array([data['score']]))
+            #     next_point += 100
+            # else:
+            #     agent.giveReward(numpy.array([0]))
+
+        turn += 1
         grid = data['grid']
 
         print_state(turn, data)
@@ -50,25 +61,16 @@ def play(agent):
     return data['score']
 
 def main():
-
-    # 2048の全ての状態を保存するのは無理でしょ.
-    #   14^16通りの状態があるよね.
-    #controller = ActionValueTable(16, 4)
-    #learner = Q()
-    #controller.initialize(1.)
-
-    #controller = ActionValueNetwork(16, 4)
-    controller = ActionValueNetwork(9, 4)
-
-    learner = NFQ()
-    #learner._setExplorer(EpsilonGreedyExplorer(0.0))
-    agent = LearningAgent(controller, learner)
+    # if os.path.exists('./agent.dump'):
+    #     with open('./agent.dump') as f:
+    #         agent = pickle.load(f)
+    # else:
+        controller = ActionValueNetwork(9, 4)
+        learner = NFQ()
+        agent = LearningAgent(controller, learner)
 
     score_list = []
     for i in range(10000):
-        # if os.path.exists('./agent.dump'):
-        #     with open('./agent.dump') as f:
-        #         agent = pickle.load(f)
 
         score = play(agent)
         score_list.append(score)
