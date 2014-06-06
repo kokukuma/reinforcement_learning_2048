@@ -12,3 +12,5 @@ jawiki
 jawiki_ori
 wikipedia/
 wordvec.bin
+*.dump
+.tags
