@@ -44,6 +44,8 @@ def environment(state, action, turn=1):
 #
     if next_state[0] == 0 and next_state[1] == 0:
         #reward = float(300) / turn
+        #reward = 10
+        #reward = 100
         reward = 1000
 
     elif next_state[0] == 5 and next_state[1] == 5:
@@ -141,6 +143,7 @@ def show_valuse(agent,state):
 def training(agent):
     print 'train'
     agent.learner._setExplorer(EpsilonGreedyExplorer(epsilon=1.0))
+    #agent.learner._setExplorer(EpsilonGreedyExplorer(epsilon=1.0, decay=0.5))
     for i in range(100):
         print i
         show_valuse(agent,[0,1])
@@ -187,7 +190,7 @@ def print_state(agent, normalize_type='neural'):
 #---------------------------------------------------------
 # learner
 #---------------------------------------------------------
-def q_learning_nfq():
+def q_learning_nfq(result_path):
 
     controller = ActionValueNetwork(12, 4)
 
@@ -232,11 +235,12 @@ def q_learning_nfq():
 
         print i, int(numpy.mean(score_list)) , max(score_list) , score, turn
 
-        with open('./agent.dump', 'w') as f:
+        with open(result_path+'/agent.dump', 'w') as f:
             pickle.dump(agent, f)
-        with open('./score.dump', 'w') as f:
+        with open(result_path+'/score.dump', 'w') as f:
             pickle.dump([score_list, turn_list], f)
 
+    print_state(agent)
 
 
 
@@ -250,7 +254,8 @@ def q_learning_table():
 
     score_list = []
     turn_list  = []
-    for i in range(500):
+    # neural側のトレーニング分 +100
+    for i in range(600):
         print_state(agent, 'table')
 
         score, turn = play(agent, 'table')
@@ -268,9 +273,17 @@ def q_learning_table():
             pickle.dump([score_list, turn_list], f)
 
 if __name__ == '__main__':
+    import sys
+    argvs = sys.argv
+    if len(argvs) == 0:
+        result_path = './'
+    else:
+        result_path =  argvs[1]
+    print result_path
+
     # NFQ
-    #q_learning_nfq()
+    q_learning_nfq(result_path)
 
     # Q-learning
-    q_learning_table()
+    #q_learning_table()
 
