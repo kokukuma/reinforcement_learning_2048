@@ -33,7 +33,8 @@ def play(agent):
         agent.integrateObservation(numpy.array(grid).ravel())
         move = agent.getAction()
 
-        data = api_move(session_id, move[0])
+        #data = api_move(session_id, move[0])
+        data = api_move(session_id, numpy.random.randint(4, size=1)[0])
 
         if grid == data['grid']:
             agent.giveReward(numpy.array([-50]))
@@ -80,7 +81,8 @@ def main():
         #   pybrain/rl/learners/valuebased/q.py
         #   => learnerをQからNFQにしたら行けた.
         #   => http://stackoverflow.com/questions/23755927/pybrain-training-a-actionvaluenetwork-doesnt-properly-work
-        agent.learn()
+
+        #agent.learn()
         agent.reset()
 
         #data =[[0,0,0,0], [0,0,0,0], [0,0,0,2], [0,0,0,2]]
