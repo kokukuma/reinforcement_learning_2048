@@ -52,8 +52,8 @@ def q_learning_nfq(**args):
 
     score_list = []
     turn_list = []
-    for i in range(2):
-    #for i in range(50):
+    #for i in range(2):
+    for i in range(50):
 
         # agent 初期化
         # rand = 1.0
