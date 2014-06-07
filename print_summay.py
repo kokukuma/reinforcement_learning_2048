@@ -23,15 +23,15 @@ def plot(fig, data):
 
 def main():
     argvs = sys.argv
+    ignore_path = ['result/base/table', 'result/input_format/normalized']
 
     # search dump files
     dump_files = defaultdict(dict)
     for root, dirs, files in os.walk(argvs[1]):
-        for path in files:
-            if path in ['agent.dump']:
-                dump_files[root]['agent'] = root + '/' + path
-            if path in ['score.dump']:
-                dump_files[root]['score'] = root + '/' + path
+        if not root in ignore_path:
+            for path in files:
+                if path in ['result.dump']:
+                    dump_files[root]['score'] = root + '/' + path
 
     # get result
     results = defaultdict(dict)
@@ -40,12 +40,11 @@ def main():
             tmp = pickle.load(f)
             score_list = tmp[0]
             turn_list  = tmp[1]
-        with open(data['agent']) as f:
-            agent = pickle.load(f)
+            agent      = tmp[2]
 
-        results[key]['score_ave'] =  numpy.average(score_list[-50])
-        results[key]['turn_ave']  =  numpy.average(turn_list[-50])
-        results[key]['turn_var']  =  numpy.var(turn_list[-50])
+        results[key]['score_ave'] =  numpy.average(score_list[-50:])
+        results[key]['turn_ave']  =  numpy.average(turn_list[-50:])
+        results[key]['turn_var']  =  numpy.std(turn_list[-50:])
         results[key]['agent']         =  agent
 
         # save plot

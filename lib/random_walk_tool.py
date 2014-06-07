@@ -9,7 +9,7 @@ import numpy
 #---------------------------------------------------------
 # environment / play
 #---------------------------------------------------------
-def environment(state, action, turn=1):
+def environment(state, action, turn=1, args=None):
     """
     action 0:上, 1:下, 2:左, 3:右
     """
@@ -35,7 +35,8 @@ def environment(state, action, turn=1):
         #reward = float(300) / turn
         #reward = 10
         #reward = 100
-        reward = 1000
+        #reward = 1000
+        reward = args['reward']
 
     elif next_state[0] == 5 and next_state[1] == 5:
         reward = 0
@@ -44,12 +45,13 @@ def environment(state, action, turn=1):
 
 
 # random walk
-def play(agent, normalize_type='neural'):
-    state = [2, 2]
-    # x = numpy.random.randint(4, size=1)[0]
-    # y = numpy.random.randint(4, size=1)[0]
-    # state = [x+1, y+1]
-    # print state
+def play(agent, normalize_type='neural', args=None):
+    if args['init_state_random']:
+        x = numpy.random.randint(4, size=1)[0]
+        y = numpy.random.randint(4, size=1)[0]
+        state = [x+1, y+1]
+    else:
+        state = [2, 2]
     turn  = 0
     score = 0
 
@@ -63,7 +65,7 @@ def play(agent, normalize_type='neural'):
         move = agent.getAction()
 
         #data = api_move(session_id, move[0])
-        state, reward = environment(state, move, turn)
+        state, reward = environment(state, move, turn, args)
 
         score += reward
         if turn > 100:
@@ -133,7 +135,6 @@ def print_state(agent, normalize_type='neural'):
     x_number = 6
     y_number = 6
     state_dict = []
-    print '----------------------------'
     for y in reversed(range(y_number)):
         print y, " : ",
         for x in range(x_number):
