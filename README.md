@@ -9,13 +9,30 @@ reinforcement_learning_2048
 + これをローカルで立ち上げて置けば, api叩いて2048を遊ぶことができる.
 + 比較のため, 自作とpybrainを療法で試す.
 
-# 起動方法
+## 起動方法
 + 2048_as_a_service
   + node index.js 
 + 2048_ai
   + python main.py
   + python pybrain_rl.py
 
+## 計算環境の構築
++ python
+  + sudo apt-get install python2.7-dev
++ numpy/scipy/matplotlib
+  + sudo apt-get install python-setuptools
+  + sudo apt-get install python-numpy
+  + sudo apt-get install python-scipy
+  + sudo apt-get install python-matplotlib
++ pybrain
+  + http://pybrain.org/docs/quickstart/installation.html
++ 2048
+  + https://github.com/Semantics3/2048-as-a-service
+  + https://github.jp.klab.com/karino-t/reinforcement_learning_2048
+
+
+## link
++ [pybrain-rl](docs/pybrain_rl.md)
 
 
 # 以下, メモ.
