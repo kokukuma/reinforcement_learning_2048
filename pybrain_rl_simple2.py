@@ -30,7 +30,7 @@ def training(agent, args):
         # show_valuse(agent,[0,1])
         # show_valuse(agent,[1,0])
 
-        if i % args['episodes'] == 0 and not i == 0:
+        if i % int(args['episodes']) == 0 and not i == 0:
             agent.learn()
             agent.reset()
 
