@@ -22,7 +22,7 @@ def training(agent, args):
     print 'total : ', args['total_episodes']
     print 'each  : ', args['episodes']
 
-    agent.learner._setExplorer(EpsilonGreedyExplorer(epsilon=args['learning_epsilon']))
+    agent.learner._setExplorer(EpsilonGreedyExplorer(epsilon=float(args['learning_epsilon'])))
     for i in range(int(args['total_episodes'])):
         # show_valuse(agent,[0,1])
         # show_valuse(agent,[1,0])

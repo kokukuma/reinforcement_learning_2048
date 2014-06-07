@@ -36,7 +36,7 @@ def environment(state, action, turn=1, args=None):
         #reward = 10
         #reward = 100
         #reward = 1000
-        reward = args['reward']
+        reward = int(args['reward'])
 
     elif next_state[0] == 5 and next_state[1] == 5:
         reward = 0
