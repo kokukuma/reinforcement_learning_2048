@@ -156,7 +156,7 @@ if __name__ == '__main__':
 
     # NFQ
     #q_learning_nfq(result_path, **argvs)
-    print 
+    print
     print '============================================'
     print 'NFQ'
     print '============================================'
