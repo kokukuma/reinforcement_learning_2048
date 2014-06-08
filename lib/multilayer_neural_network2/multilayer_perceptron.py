@@ -44,8 +44,23 @@ class GradientDescent(object):
 
         return self.momentum * weight_mat - self.learning_coefficient * grad
 
+class EvaluateError(object):
+    def __init__(self):
+        pass
 
-class MultiLayerNeuralNetwork(OutputFunciton, BackPropagationLogic):
+    @classmethod
+    def get_rss(self, output_vec, predict_vec):
+        """残差平方和"""
+        return 0.5 * np.sum((predict_vec - output_vec ) ** 2 )
+
+    @classmethod
+    def get_coss_entropy(self, output_vec, predict_vec):
+        """交差エントロピー"""
+        # TODO: 絶対間違ってるから直す.
+        return - np.sum( np.dot(predict_vec.T, np.log(output_vec)) + np.dot((1 - predict_vec).T,  np.log(1 - output_vec)))
+
+
+class MultiLayerNeuralNetwork(OutputFunciton, BackPropagationLogic, EvaluateError):
     """
     """
     def __init__( self,
@@ -116,7 +131,6 @@ class MultiLayerNeuralNetwork(OutputFunciton, BackPropagationLogic):
             # バックプロパゲーションで重みを更新.
             start_num = 0
             for x in xrange(0, len(train_data_input)+self.mini_batch, self.mini_batch):
-            #for x in xrange(0, len(train_data_input)/10, self.mini_batch):
                 if x == 0:
                     continue
                 input_data  = train_data_input[start_num:x]
@@ -124,38 +138,16 @@ class MultiLayerNeuralNetwork(OutputFunciton, BackPropagationLogic):
                 self.weights = self.update_weights(input_data, output_data, self.weights)
                 start_num = x
 
-
-            # print self.weights
-
             # 全教師データとの誤差が設定値以下になっていること.
-            start_num = 0
-            for x in xrange(0, len(train_data_input)+self.mini_batch, self.mini_batch):
-                if x == 0:
-                    continue
-                #print start_num, x
-                input_data  = train_data_input[start_num:x]
-                output_data = train_data_output[start_num:x]
-                predict_data = self.predict_multi(input_data)
-
-                error_list.append(self.get_e_value(output_data, predict_data) )
-                #print error_list
-                start_num = x
-
-            if reduce(lambda x,y : x and y , [ e < self.error_border for e in error_list]):
-                if self.print_error:
-                    print self.print_error
-                    print 'error_list : ', error_list
-                break
+            predict_data = self.predict_multi(train_data_input)
+            error = self.get_rss(train_data_output, predict_data)
+            error_hist.append((loop_num, error))
 
             # 誤差表示
             import sys
             if self.print_error:
-                error = round(sum(error_list) / len(error_list),5)
-                error_hist.append((loop_num, error))
-                #print 'l : ', loop_num, error, [ e < self.error_border for e in error_list].count(False)
-                error = '\rloop_num:%d , error:%f, error_node:%s, learn_coef:%s' % (loop_num, error, [ e < self.error_border for e in error_list].count(False), str(self.start_learning_coef) )
+                error = '\rloop_num:%d , error:%f, learn_coef:%s' % (loop_num, error, str(self.start_learning_coef) )
                 sys.stdout.write(error)
-                #sys.stdout.write("\r%s" % error)
                 sys.stdout.flush()
 
             # 長過ぎたらあきらめる.
@@ -257,8 +249,8 @@ def test_multilayer_perceptron():
     x_range = [0,1]
     y_range = [0,1]
     #liner_data = liner_training_data(x_range, y_range)
-    liner_data = quadratic_function_data(x_range, y_range, split=20)
-    #liner_data = sin_function_data(x_range, y_range, 20)
+    #liner_data = quadratic_function_data(x_range, y_range, split=20)
+    liner_data = sin_function_data(x_range, y_range, 20)
     train_data_input, train_data_output = change_format(liner_data)
 
     fig = plt.figure()
