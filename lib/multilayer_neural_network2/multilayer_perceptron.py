@@ -66,7 +66,6 @@ class GradientDescent(object):
         if self.lastgradient == None:
             self.lastgradient = np.zeros(grad.shape, dtype='float64')
             self.rprop_theta  = self.lastgradient + 0.1
-            #print self.rprop_theta
 
         #gradient_arr = np.asarray(grad)
         gradient_arr = np.asarray(grad)
@@ -78,6 +77,7 @@ class GradientDescent(object):
         dirSwitch = self.lastgradient * gradient_arr
         self.rprop_theta[dirSwitch > 0] *= self.etaplus
         self.rprop_theta[dirSwitch < 0] *= self.etaminus
+
         gradient_arr[dirSwitch < 0] = 0
         self.rprop_theta = self.rprop_theta.clip(min=self.deltamin, max=self.deltamax)
 
@@ -136,7 +136,7 @@ class MultiLayerNeuralNetwork(OutputFunciton, BackPropagationLogic, EvaluateErro
         self.best_weights         = {}
         self.best_error           = None
 
-
+        # grad
         for i in range(self.total_layer_num):
             tmp = GradientDescent(self.start_learning_coef, self.mini_batch, rprop=rprop)
             self.gradientdescent_list.append(tmp)
@@ -147,6 +147,7 @@ class MultiLayerNeuralNetwork(OutputFunciton, BackPropagationLogic, EvaluateErro
         # init weight
         for idx, input_num, output_num in _two_layer_extraction(layer_construction):
             weight_mat = np.ones((output_num, input_num+1))
+            #weight_mat[:] *= np.random.normal(0, 0.01, 1)
             for i in range(output_num):
                 for j in range(input_num+1):
                     weight_mat[i, j] *= np.random.normal(0, 0.01, 1)
