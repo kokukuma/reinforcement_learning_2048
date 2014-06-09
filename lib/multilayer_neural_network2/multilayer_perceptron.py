@@ -19,7 +19,8 @@ def add_bios_input(input_vec):
 class GradientDescent(object):
     """ 傾きに対していろいろやる
     """
-    def __init__(self, learning_coefficient, mini_batch, momentum=1.0, decay=1.0, regular=None):
+
+    def __init__(self, learning_coefficient, mini_batch, momentum=1.0, decay=1.0, regular=None, rprop=False):
         self.learning_coefficient = learning_coefficient
         self.mini_batch           = mini_batch
         self.momentum             = momentum
@@ -27,9 +28,26 @@ class GradientDescent(object):
         self.regular              = regular
         self.l                    = 0.01
         self.norm                 = 0.
+        self.rprop                = rprop
+        if self.rprop:
+            self.etaplus  = 1.2
+            self.etaminus = 0.5
+            self.deltamax = 5.0
+            self.deltamin = 0.01
+            self.lastgradient = None
 
     def __call__(self, weight_mat, deleta_mat, pre_layer_predict_vec):
         """ 更新後の重みを返す
+        """
+        grad = np.dot(deleta_mat.T , pre_layer_predict_vec ) / self.mini_batch
+
+        if self.rprop:
+            return self._rprop(weight_mat, grad)
+        else:
+            return self._backprop(weight_mat, grad)
+
+    def _backprop(self, weight_mat, grad):
+        """ 通常のbackprop
         """
         from numpy import linalg as LA
         # TODO: この正則化, 層選べないじゃん.
@@ -38,11 +56,36 @@ class GradientDescent(object):
         elif self.regular == 'L2':
             self.norm = self.l * LA.norm(weight_mat, 2)
 
-        grad = np.dot(deleta_mat.T , pre_layer_predict_vec ) / self.mini_batch +  self.norm
-
         self.learning_coefficient *= self.decay
 
-        return self.momentum * weight_mat - self.learning_coefficient * grad
+        return self.momentum * weight_mat - self.learning_coefficient * (grad) + self.norm
+
+    def _rprop(self, weight_mat, grad):
+        """ iRprop-
+        """
+        if self.lastgradient == None:
+            self.lastgradient = np.zeros(grad.shape, dtype='float64')
+            self.rprop_theta  = self.lastgradient + 0.1
+            #print self.rprop_theta
+
+        #gradient_arr = np.asarray(grad)
+        gradient_arr = np.asarray(grad)
+
+        # update param
+        delta = np.sign(gradient_arr)  * self.rprop_theta
+
+        # update param
+        dirSwitch = self.lastgradient * gradient_arr
+        self.rprop_theta[dirSwitch > 0] *= self.etaplus
+        self.rprop_theta[dirSwitch < 0] *= self.etaminus
+        gradient_arr[dirSwitch < 0] = 0
+        self.rprop_theta = self.rprop_theta.clip(min=self.deltamin, max=self.deltamax)
+
+        # save
+        self.lastgradient = gradient_arr.copy()
+
+        return weight_mat - delta
+
 
 class EvaluateError(object):
     def __init__(self):
@@ -71,7 +114,8 @@ class MultiLayerNeuralNetwork(OutputFunciton, BackPropagationLogic, EvaluateErro
                   print_error=True,
                   mini_batch=100,
                   layer_type=[LinearLayer, SigmoidLayer, SigmoidLayer],
-                  epoch_limit=5000):
+                  epoch_limit=5000,
+                  rprop=False):
 
         def _two_layer_extraction(layer_construction):
             for idx, neuron_num in enumerate(layer_construction):
@@ -88,7 +132,14 @@ class MultiLayerNeuralNetwork(OutputFunciton, BackPropagationLogic, EvaluateErro
         self.print_error          = print_error
         self.mini_batch           = mini_batch
         self.epoch_limit          = epoch_limit
-        self.gradientdescent      = GradientDescent(self.start_learning_coef, self.mini_batch)
+        self.gradientdescent_list = []
+        self.best_weights         = {}
+        self.best_error           = None
+
+
+        for i in range(self.total_layer_num):
+            tmp = GradientDescent(self.start_learning_coef, self.mini_batch, rprop=rprop)
+            self.gradientdescent_list.append(tmp)
 
         # TODO: add tanh /gausian
         self.layer_type = [x() for x in layer_type]
@@ -141,6 +192,12 @@ class MultiLayerNeuralNetwork(OutputFunciton, BackPropagationLogic, EvaluateErro
             # 全教師データとの誤差が設定値以下になっていること.
             predict_data = self.predict_multi(train_data_input)
             error = self.get_rss(train_data_output, predict_data)
+            if self.best_error == None or self.best_error > error:
+                self.best_error  = error
+                self.best_weights = self.weights
+
+            if error < self.error_border:
+                break
             error_hist.append((loop_num, error))
 
             # 誤差表示
@@ -155,6 +212,10 @@ class MultiLayerNeuralNetwork(OutputFunciton, BackPropagationLogic, EvaluateErro
                 if self.print_error:
                     print 'out of limit'
                 break
+
+        print self.best_error
+        self.weights = self.best_weights
+
         return error_hist
 
     #@profile
@@ -180,7 +241,7 @@ class MultiLayerNeuralNetwork(OutputFunciton, BackPropagationLogic, EvaluateErro
                 deleta_mat  = deleta_mat[:,1:]
 
             pre_layer_predict_vec = predict_data_list[layer_num - 1]
-            weights[layer_num]    = self.gradientdescent(weights[layer_num], deleta_mat, pre_layer_predict_vec)
+            weights[layer_num]    = self.gradientdescent_list[layer_num](weights[layer_num], deleta_mat, pre_layer_predict_vec)
 
             # 中間層の重み更新で利用する.
             next_deleta_mat = deleta_mat
@@ -244,7 +305,10 @@ def test_multilayer_perceptron():
                                     threshold=0.1,
                                     start_learning_coef=0.2,
                                     sigmoid_alpha=10,
-                                    mini_batch=10)
+                                    mini_batch=100,
+                                    layer_type=[LinearLayer, SigmoidLayer, SigmoidLayer],
+                                    rprop=True
+                                    )
 
     x_range = [0,1]
     y_range = [0,1]
