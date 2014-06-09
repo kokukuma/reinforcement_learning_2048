@@ -40,6 +40,7 @@ reinforcement_learning_2048
 
 ## 2次元ランダムウォーク
 + Q-learningの検証のため, 簡単なモデルで試す.
++ [2d-random-walk](docs/2d_random_walk.md)
 
 
 
