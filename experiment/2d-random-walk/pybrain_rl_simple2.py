@@ -1,12 +1,14 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import os
 import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../../')
+
 import pickle
 from scipy import * #@UnusedWildImport
 import pylab
 import numpy
-import os
 from pprint import pprint
 from pybrain.rl.learners.valuebased import ActionValueTable, ActionValueNetwork
 from pybrain.rl.agents import LearningAgent

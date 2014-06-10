@@ -1,6 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../../')
+
 import pickle
 from scipy import * #@UnusedWildImport
 import pylab
@@ -66,9 +70,9 @@ def main():
     #     with open('./agent.dump') as f:
     #         agent = pickle.load(f)
     # else:
-        controller = ActionValueNetwork(9, 4)
-        learner = NFQ()
-        agent = LearningAgent(controller, learner)
+    controller = ActionValueNetwork(9, 4)
+    learner = NFQ()
+    agent = LearningAgent(controller, learner)
 
     score_list = []
     for i in range(10000):
