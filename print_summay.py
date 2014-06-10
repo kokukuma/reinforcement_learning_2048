@@ -43,8 +43,9 @@ def main():
             agent      = tmp[2]
 
         results[key]['score_ave'] =  numpy.average(score_list[-50:])
+        results[key]['score_std'] =  numpy.std(score_list[-50:])
         results[key]['turn_ave']  =  numpy.average(turn_list[-50:])
-        results[key]['turn_var']  =  numpy.std(turn_list[-50:])
+        results[key]['turn_std']  =  numpy.std(turn_list[-50:])
         results[key]['agent']         =  agent
 
         # save plot
@@ -58,7 +59,7 @@ def main():
 
     # print result
     for key, data in sorted(results.items()):
-        print "%10s, %10s, %10s(%s) " % (key , data['score_ave'], data['turn_ave'], data['turn_var'])
+        print "%10s, %10s(%s), %10s(%s) " % (key , data['score_ave'], data['score_std'], data['turn_ave'], data['turn_std'])
         print_state(data['agent'], normalize_type='neural')
 
 if __name__ == '__main__':

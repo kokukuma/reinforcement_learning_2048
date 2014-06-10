@@ -45,16 +45,17 @@ def environment(state, action, turn=1, args=None):
 
 
 # random walk
-def play(agent, normalize_type='neural', args=None):
-    if args['init_state_random']:
-        x = numpy.random.randint(4, size=1)[0]
-        y = numpy.random.randint(4, size=1)[0]
-        state = [x+1, y+1]
-    else:
-        state = [2, 2]
+def play(agent, normalize_type='neural', args=None, state=None):
+    if state == None:
+        if args['init_state_random']:
+            x = numpy.random.randint(4, size=1)[0]
+            y = numpy.random.randint(4, size=1)[0]
+            state = [x+1, y+1]
+        else:
+            state = [2, 2]
+
     turn  = 0
     score = 0
-
     while(1):
         if normalize_type == 'neural':
             observ = normalize(state)

@@ -73,7 +73,7 @@ def q_learning_nfq(**args):
         print_state(agent)
         agent.learner._setExplorer(EpsilonGreedyExplorer(0.3))
 
-        score, turn = play(agent, 'neural', args)
+        score, turn = play(agent, 'neural', args, [2,2])
 
         score_list.append(score)
         turn_list.append(turn)
