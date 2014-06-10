@@ -15,7 +15,7 @@ from pybrain.rl.agents import LearningAgent
 from pybrain.rl.learners import Q, SARSA, NFQ#@UnusedImport
 from pybrain.rl.experiments import Experiment
 from pybrain.rl.explorers.discrete.egreedy import EpsilonGreedyExplorer
-from lib.random_walk_tool import *
+from lib.data_source.random_walk_tool import *
 
 
 def training(agent, args):
