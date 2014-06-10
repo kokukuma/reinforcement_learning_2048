@@ -92,6 +92,12 @@ class EvaluateError(object):
         pass
 
     @classmethod
+    def split_data(self, vec, proportion=0.5):
+        """検証用データの分割"""
+        border = len(vec)*proportion
+        return vec[:border], vec[border:]
+
+    @classmethod
     def get_rss(self, output_vec, predict_vec):
         """残差平方和"""
         return 0.5 * np.sum((predict_vec - output_vec ) ** 2 )
@@ -161,6 +167,12 @@ class MultiLayerNeuralNetwork(OutputFunciton, BackPropagationLogic, EvaluateErro
         loop_num = 0
         np_rng_input  = np.random.RandomState(1234)
         np_rng_output = np.random.RandomState(1234)
+        np_rng_input.shuffle(train_data_input)
+        np_rng_output.shuffle(train_data_output)
+
+        validate_dataset = {}
+        validate_dataset['input'], train_data_input  = self.split_data(train_data_input, 0.1)
+        validate_dataset['output'],train_data_output = self.split_data(train_data_output, 0.1)
 
         error_hist = []
 
@@ -190,22 +202,29 @@ class MultiLayerNeuralNetwork(OutputFunciton, BackPropagationLogic, EvaluateErro
                 self.weights = self.update_weights(input_data, output_data, self.weights)
                 start_num = x
 
-            # 全教師データとの誤差が設定値以下になっていること.
+            # トレーニングデータでエラーを確認.
             predict_data = self.predict_multi(train_data_input)
-            error = self.get_rss(train_data_output, predict_data)
-            if self.best_error == None or self.best_error > error:
-                self.best_error  = error
+            train_error  = self.get_rss(train_data_output, predict_data)
+
+            # 検証用データでエラーを確認.
+            predict_data = self.predict_multi(validate_dataset['input'])
+            valid_error  = self.get_rss(validate_dataset['output'], predict_data)
+
+            #
+            if self.best_error == None or self.best_error > train_error:
+                self.best_error        = train_error
+                self.best_valid_error  = valid_error
                 self.best_weights = self.weights
 
-            if error < self.error_border:
+            if train_error < self.error_border:
                 break
-            error_hist.append((loop_num, error))
+            error_hist.append((loop_num, train_error))
 
             # 誤差表示
             import sys
             if self.print_error:
-                error = '\rloop_num:%d , error:%f, learn_coef:%s' % (loop_num, error, str(self.start_learning_coef) )
-                sys.stdout.write(error)
+                train_error = '\rloop_num:%d , train_error:%f, valid_error:%s' % (loop_num, train_error, valid_error)
+                sys.stdout.write(train_error)
                 sys.stdout.flush()
 
             # 長過ぎたらあきらめる.
@@ -214,7 +233,7 @@ class MultiLayerNeuralNetwork(OutputFunciton, BackPropagationLogic, EvaluateErro
                     print 'out of limit'
                 break
 
-        print self.best_error
+        print self.best_error, self.best_valid_error
         self.weights = self.best_weights
 
         return error_hist
@@ -302,6 +321,8 @@ def test_multilayer_perceptron():
         return data
 
     import matplotlib.pyplot as plt
+    # backpropのときは, mini_batch = 10
+    # rpropのときは, mini_batch = 100
     mlnn = MultiLayerNeuralNetwork( [2, 5, 1],
                                     threshold=0.1,
                                     start_learning_coef=0.2,
@@ -315,7 +336,7 @@ def test_multilayer_perceptron():
     y_range = [0,1]
     #liner_data = liner_training_data(x_range, y_range)
     #liner_data = quadratic_function_data(x_range, y_range, split=20)
-    liner_data = sin_function_data(x_range, y_range, 20)
+    liner_data = sin_function_data(x_range, y_range, split=20)
     train_data_input, train_data_output = change_format(liner_data)
 
     fig = plt.figure()
