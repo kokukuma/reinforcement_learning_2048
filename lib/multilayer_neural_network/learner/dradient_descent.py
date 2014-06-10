@@ -1,17 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import math
-import random
-import sys
 import numpy as np
-from output_function import OutputFunciton
-from back_propagation_logic import BackPropagationLogic
-from get_training_data import liner_training_data,quadratic_function_data, sin_function_data, change_format
-
-from layer.linear_layer import LinearLayer
-from layer.sigmoid_layer import SigmoidLayer
-from layer.softmax_layer import SoftmaxLayer
 
 class GradientDescent(object):
     """ 傾きに対していろいろやる

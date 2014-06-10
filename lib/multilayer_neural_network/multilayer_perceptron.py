@@ -1,15 +1,15 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import math
-import random
+import os
 import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../../')
 import numpy as np
-from evaluate_error import  EvaluateError
-from dradient_descent import GradientDescent
-from output_function import OutputFunciton
-from back_propagation_logic import BackPropagationLogic
-from get_training_data import liner_training_data,quadratic_function_data, sin_function_data, change_format
+from learner.evaluate_error import  EvaluateError
+from learner.dradient_descent import GradientDescent
+from learner.back_propagation_logic import BackPropagationLogic
+
+from lib.data_source.get_training_data import liner_training_data,quadratic_function_data, sin_function_data, change_format
 
 from layer.linear_layer import LinearLayer
 from layer.sigmoid_layer import SigmoidLayer
@@ -160,7 +160,6 @@ class MultiLayerNeuralNetwork(BackPropagationLogic, EvaluateError):
 
 
 def test_multilayer_perceptron():
-
     def plot(fig, data):
         ax  = fig.add_subplot(111)
         ax.plot([x[0] for x in data], [x[1] for x in data])
