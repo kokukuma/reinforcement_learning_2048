@@ -47,8 +47,6 @@ class MultiLayerNeuralNetwork(BackPropagationLogic, EvaluateError):
         self.mini_batch           = mini_batch
         self.epoch_limit          = epoch_limit
         self.gradientdescent_list = []
-        self.best_weights         = {}
-        self.best_error           = None
 
         # grad
         for i in range(self.total_layer_num):
@@ -79,10 +77,12 @@ class MultiLayerNeuralNetwork(BackPropagationLogic, EvaluateError):
         np_rng_output.shuffle(train_data_output)
 
         validate_dataset = {}
-        validate_dataset['input'], train_data_input  = self.split_data(train_data_input, 0.1)
-        validate_dataset['output'],train_data_output = self.split_data(train_data_output, 0.1)
+        validate_dataset['input'], train_data_input  = self.split_data(train_data_input, 0.01)
+        validate_dataset['output'],train_data_output = self.split_data(train_data_output, 0.01)
 
-        error_hist = []
+        error_hist        = []
+        self.best_weights = {}
+        self.best_error   = None
 
         # print
         # print 'START TRAINING'

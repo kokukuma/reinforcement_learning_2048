@@ -61,20 +61,22 @@ def play(agent, normalize_type='neural', args=None, state=None):
             observ = normalize(state)
         elif normalize_type == 'table':
             observ = convert(state)
-
         agent.integrateObservation(observ)
-        move = agent.getAction()
+        move, _ = agent.getAction()
 
         #data = api_move(session_id, move[0])
+        #print state, move,
         state, reward = environment(state, move, turn, args)
+        #print reward, state
 
         score += reward
         if turn > 100:
-            agent.giveReward(numpy.array([0]))
+            #agent.giveReward(numpy.array([0]))
+            agent.giveReward(0)
             return score, turn
         else:
-            agent.giveReward(numpy.array([reward]))
-            #agent.giveReward(reward)
+            #agent.giveReward(numpy.array([reward]))
+            agent.giveReward(reward)
 
 
         turn += 1
@@ -123,16 +125,16 @@ def fit_greedy(i):
     else:
         return 0.6
 
-def show_valuse(agent,state):
+def show_valuse(getvalue_func,state):
     observ = numpy.array(normalize(state)).ravel()
     print state,
-    print ", 0 :", agent.module.getValue(observ, 0),
-    print ", 1 :", agent.module.getValue(observ, 1),
-    print ", 2 :", agent.module.getValue(observ, 2),
-    print ", 3 :", agent.module.getValue(observ, 3)
+    print ", 0 :", getvalue_func(observ, 0),
+    print ", 1 :", getvalue_func(observ, 1),
+    print ", 2 :", getvalue_func(observ, 2),
+    print ", 3 :", getvalue_func(observ, 3)
 
 
-def print_state(agent, normalize_type='neural'):
+def print_state(getvalue_func, normalize_type='neural'):
     x_number = 6
     y_number = 6
     state_dict = []
@@ -146,10 +148,14 @@ def print_state(agent, normalize_type='neural'):
             elif normalize_type == 'table':
                 observ = convert([x,y])
 
-            res.append(agent.module.getValue(observ, 0))
-            res.append(agent.module.getValue(observ, 1))
-            res.append(agent.module.getValue(observ, 2))
-            res.append(agent.module.getValue(observ, 3))
+            # res.append(agent.module.getValue(observ, 0))
+            # res.append(agent.module.getValue(observ, 1))
+            # res.append(agent.module.getValue(observ, 2))
+            # res.append(agent.module.getValue(observ, 3))
+            res.append(getvalue_func(observ, 0))
+            res.append(getvalue_func(observ, 1))
+            res.append(getvalue_func(observ, 2))
+            res.append(getvalue_func(observ, 3))
 
             if res.index(max(res) ) == 0:
                 print "↑",
