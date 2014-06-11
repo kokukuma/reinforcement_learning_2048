@@ -35,25 +35,23 @@ class QLearning(LogAgent):
     def __init__(self, input_number, output_number, dummy=False):
         LogAgent.__init__(self, input_number, output_number)
 
-        self.l = [0, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]
-        self.dummy = dummy
         self.greedy_rate   = 0.3
         self.alpha         = 0.5
         self.ganmma        = 0.9
         self.memory        = {}
         self.lastobs       = None
-        if self.dummy:
-            self.input_number  = input_number * len(self.l)
-        else:
-            self.input_number  = input_number
+        self.input_number  = input_number
         self.output_number = output_number
+
         #self.q_mat = numpy.ones((input_number, output_numbe))
-        self.mlnn = MultiLayerNeuralNetwork( [self.input_number,  5, self.output_number],
+        #self.mlnn = MultiLayerNeuralNetwork( [self.input_number, 5, self.output_number],
+        # pybrain型network
+        self.mlnn = MultiLayerNeuralNetwork( [self.input_number+self.output_number, self.input_number+self.output_number , 1],
                                             threshold=0.5,
                                             start_learning_coef=0.1,
                                             sigmoid_alpha=10,
                                             print_error=True,
-                                            mini_batch=10,
+                                            mini_batch=50,
                                             epoch_limit=500,
                                             layer_type=[LinearLayer, SigmoidLayer, LinearLayer],
                                             rprop=True)
@@ -75,6 +73,7 @@ class QLearning(LogAgent):
             action = numpy.random.randint(self.output_number, size=1)[0]
             q_vaue = 0
         else:
+            # pybrain型network
             output_vec = self.get_q_values(input_list)
             action = list(output_vec).index(max(output_vec))
             q_vaue = max(output_vec)
@@ -85,16 +84,21 @@ class QLearning(LogAgent):
         else:
             return action
 
-    def get_q_values(self, input_list, action=None):
-        input_mat = numpy.array(input_list)
-        #output_vec = self.mlnn.predict( input_mat.ravel() )
-        #output_vec = self.mlnn.predict( self.normalize_input(input_mat.ravel()))
-        output_vec = self.mlnn.predict(input_mat.ravel())
+    def convert_input(self, input_list, action):
+        action_vec = numpy.array([[ 1. if x == action else 0. for x in range(self.output_number)]])
+        inp = numpy.append(input_list, action_vec)
+        return numpy.array([inp])
 
+    def get_q_values(self, input_list, action=None):
         if action == None:
-            return map((lambda x: x if x >0 else 0), output_vec)
+            q_values = []
+            for i in range(self.output_number):
+                inp = self.convert_input(input_list, i)
+                q_values.append(self.mlnn.predict(numpy.array(inp).ravel()) )
+            return q_values
         else:
-            return output_vec[action] if output_vec[action]>0 else 0
+            inp = self.convert_input(input_list, action)
+            return self.mlnn.predict(numpy.array(inp).ravel())
 
     def reset(self):
         self.agent_reset()
@@ -102,10 +106,6 @@ class QLearning(LogAgent):
 
     def learn(self):
         train_data = self.history
-        # print '========================================================='
-        # for i in train_data:
-        #     print i['observation'], i['action'] ,i['reward']
-        # print '========================================================='
 
         # ニューラルネットワークのトレーニングデータの形に変換
         input_data , output_data = self.change_format(train_data)
@@ -117,6 +117,47 @@ class QLearning(LogAgent):
         return error_hist
 
     def change_format(self, train_data):
+        """pybrain型network用"""
+        train_data_input  = []
+        train_data_output = []
+        lastexperience = None
+        for data in train_data:
+            if not lastexperience:
+                lastexperience = data
+                continue
+            _observation = lastexperience['observation']
+            _action      = lastexperience['action']
+            _reward      = lastexperience['reward']
+
+            # 行動前の状態におけるQ値
+            before_q_value = self.get_q_values(_observation, _action)
+
+            # 行動後の状態におけるQ値
+            after_q_values = []
+            for i in range(self.output_number):
+                tmp = self.get_q_values(data['observation'], i)
+                after_q_values.append(tmp)
+
+            # 特定の行動のQ値を更新する.
+            #print self.alpha *(_reward + self.ganmma * max(after_q_values)[0] - before_q_value[0] )
+            before_q_value[0] += self.alpha * (_reward + self.ganmma * max(after_q_values)[0]  - before_q_value[0])
+
+            #train_data_input.append(numpy.array(data['grid']).ravel())
+            input_data = numpy.array(self.convert_input(_observation, _action)).ravel()
+
+            # for next
+            lastexperience = data
+            #print input_data, _reward,numpy.array(before_q_value)
+
+            #
+            #train_data_input.append(self.normalize_input(input_data))
+            train_data_input.append(input_data)
+            train_data_output.append(numpy.array(before_q_value))
+
+        return numpy.array(train_data_input) , numpy.array(train_data_output)
+
+    def change_format_old(self, train_data):
+        """pybrain型network用"""
         train_data_input  = []
         train_data_output = []
         lastexperience = None
@@ -175,46 +216,45 @@ class QLearning(LogAgent):
     #
     #     return numpy.array(train_data_input) , numpy.array(train_data_output)
 
-    # def normalize_input(self, train_data):
-    #     if self.dummy:
-    #         # 入力はダミー変数化する.
-    #         result = numpy.zeros(self.input_number)
-    #         for i, d in enumerate(train_data):
-    #             result[self.l.index(d) + i * len(self.l) ] += 1
-    #         return result
-    #     else:
-    #         return train_data
-
 def test_q_learning():
-    result = []
-    result.append({'grid':[[0,0,1,0,0]], 'action':0, 'point':0})
-    result.append({'grid':[[0,0,1,0,0]], 'action':1, 'point':0})
-    result.append({'grid':[[0,1,0,0,0]], 'action':0, 'point':1000})
-    result.append({'grid':[[0,1,0,0,0]], 'action':1, 'point':0})
-    result.append({'grid':[[0,0,0,1,0]], 'action':0, 'point':0})
-    result.append({'grid':[[0,0,0,1,0]], 'action':1, 'point':0})
-
     # QLearn obj
     ql_obj =  QLearning(5, 2)
 
     # before train
     data =[[0,0,1,0,0]]
-    output_vec= ql_obj.get_q_values(data)
-    print output_vec
+    print ql_obj.get_q_values(data, 0)
+    print ql_obj.get_q_values(data, 1)
 
     # train
-    for data in result:
-        ql_obj.integrateObservation(data['grid'])
-        action = ql_obj.getAction()
-        ql_obj.giveReward(data['point'])
+    for i in range(20):
+        grid = [0,0,1,0,0]
+        while(1):
+            ql_obj.integrateObservation([grid])
+            action = ql_obj.getAction()
+
+            # move 1
+            if action == 0:
+                grid.append(0)
+                grid.pop(0)
+            else:
+                grid.insert(0, 0)
+                grid.pop(5)
+
+            # get reward
+            if grid.index(1) == 0:
+                ql_obj.giveReward(100)
+            else:
+                ql_obj.giveReward(0)
+            if grid.index(1) in (0,4):
+                break
     ql_obj.learn()
 
     # after train
     data =[[0,0,1,0,0]]
-    output_vec= ql_obj.get_q_values(data)
-    print output_vec
+    print ql_obj.get_q_values(data, 0)
+    print ql_obj.get_q_values(data, 1)
 
-
+    #print ql_obj.mlnn.weights
 
 if __name__ == '__main__':
     test_q_learning()

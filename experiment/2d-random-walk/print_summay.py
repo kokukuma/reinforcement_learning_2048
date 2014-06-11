@@ -7,6 +7,9 @@ result + base + network
        |      + table
        +
 """
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../../')
 
 import numpy
 import sys
@@ -14,7 +17,7 @@ import pickle
 import matplotlib.pyplot as plt
 import os
 from collections import defaultdict
-from lib.random_walk_tool import *
+from lib.data_source.random_walk_tool import *
 
 def plot(fig, data):
     ax  = fig.add_subplot(111)
@@ -60,7 +63,7 @@ def main():
     # print result
     for key, data in sorted(results.items()):
         print "%10s, %10s(%s), %10s(%s) " % (key , data['score_ave'], data['score_std'], data['turn_ave'], data['turn_std'])
-        print_state(data['agent'], normalize_type='neural')
+        print_state(data['agent'].get_q_values, normalize_type='neural')
 
 if __name__ == '__main__':
     main()
