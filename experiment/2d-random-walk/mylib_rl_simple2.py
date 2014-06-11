@@ -25,7 +25,6 @@ def training(agent, args):
     print 'total : ', args['total_episodes']
     print 'each  : ', args['episodes']
 
-    #agent.learner._setExplorer(EpsilonGreedyExplorer(epsilon=float(args['learning_epsilon'])))
     for i in range(int(args['total_episodes'])):
         # show_valuse(agent.get_q_values,[0,1])
         # show_valuse(agent.get_q_values,[1,0])
@@ -33,25 +32,21 @@ def training(agent, args):
         # show_valuse(agent.get_q_values,[0,1])
         # show_valuse(agent.get_q_values,[1,0])
 
+        agent.agent_save_episode()
+
         if i % int(args['episodes']) == 0 and not i == 0:
-            # print 'hist len :', len(agent.history)
-            # for d in agent.history:
-            #     print 'sate : ', d['observation'],
-            #     print 'action : ',d['action']
             agent.learn()
             agent.reset()
-            #print agent.history
 
         # print
         sys.stdout.write("\r   episodes:%s" % (i))
         sys.stdout.flush()
 
     print
+    agent.print_experience()
     return agent
 
-#def q_learning_nfq(result_path, **argvs):
 def q_learning_nfq(**args):
-
 
     # estimate
     best_score = 0
@@ -63,17 +58,10 @@ def q_learning_nfq(**args):
     #for i in range(2):
     for i in range(50):
 
-        # # agent 初期化
-        # # rand = 1.0
-        # # learner = NFQ(maxEpochs=100)
-        # # learner._setExplorer(EpsilonGreedyExplorer(rand))
-        # controller = ActionValueNetwork(12, 4)
-        # learner = NFQ()
-        # agent = LearningAgent(controller, learner)
         agent = QLearning(12, 4)
 
         # training
-        agent.greedy_rate   = 0.
+        agent.greedy_rate   = 0.0
         print
         print "==========================="
         print 'before training'
@@ -91,20 +79,6 @@ def q_learning_nfq(**args):
 
         print
         print i, int(numpy.mean(score_list)) , max(score_list) , score, turn
-
-        # if i % args['episodes'] == 0:
-        #     try:
-        #         agent.learn()
-        #     except:
-        #         pass
-        #     finally:
-        #         agent.reset()
-        #         # rand = fit_greedy(i)
-        #         # agent.learner._setExplorer(EpsilonGreedyExplorer(rand))
-        #         # if not i == 0 :
-        #         #     import sys
-        #         #     sys.exit()
-        # print i, int(numpy.mean(score_list)) , max(score_list) , score, turn
 
         if best_score < score or best_turn > turn:
             best_score = score

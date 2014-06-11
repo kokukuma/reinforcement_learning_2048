@@ -14,6 +14,10 @@ class LogAgent(object):
     def __init__(self, input_num, output_num):
         self.history = []
         self.last_memory = {}
+        self.episode     = []
+        self.episodes    = []
+        self.train_error = []
+        self.valid_error = []
 
     def agent_observation(self, obs):
         self.last_memory = {'observation': obs, 'action': None, 'reward': None}
@@ -24,11 +28,39 @@ class LogAgent(object):
     def agent_reward(self, reward):
         self.last_memory['reward']  = reward
         self.history.append(self.last_memory)
+        self.episode.append(self.last_memory)
+
         self.last_memory = {}
 
     def agent_reset(self):
         self.history = []
         self.last_memory = {}
+
+    def agent_save_episode(self):
+        self.episodes.append(self.episode)
+        self.episode = []
+
+    def print_experience(self):
+        """ agentの経験を集計して, summay出すやつ.
+            LogAgent classに入れるべきではない気がする.
+        """
+        print
+        print '## print agent experience'
+        print 'episode number      : %d ' %  len(self.episodes)
+
+        turn_list  = []
+        score_list = []
+        for episode in self.episodes:
+            turn_list.append(len(episode))
+            score_list.append(sum([x['reward'] for x in episode]))
+
+        print 'average episode len : %f(%f)' %  (numpy.average(turn_list),  numpy.std(turn_list))
+        print 'average score(std)  : %f(%f)' % (numpy.average(score_list), numpy.std(score_list))
+        print
+        print '## NN train summay'
+        print 'average train error : %f' %(numpy.average([x for x in self.train_error]))
+        print 'average valid error : %f' %(numpy.average([x for x in self.train_error]))
+        print
 
 
 class QLearning(LogAgent):
@@ -38,7 +70,6 @@ class QLearning(LogAgent):
         self.greedy_rate   = 0.3
         self.alpha         = 0.5
         self.ganmma        = 0.9
-        self.memory        = {}
         self.lastobs       = None
         self.input_number  = input_number
         self.output_number = output_number
@@ -50,9 +81,9 @@ class QLearning(LogAgent):
                                             threshold=0.5,
                                             start_learning_coef=0.1,
                                             sigmoid_alpha=10,
-                                            print_error=True,
+                                            print_error=False,
                                             mini_batch=50,
-                                            epoch_limit=500,
+                                            epoch_limit=50,
                                             layer_type=[LinearLayer, SigmoidLayer, LinearLayer],
                                             rprop=True)
 
@@ -104,7 +135,7 @@ class QLearning(LogAgent):
         self.agent_reset()
         return
 
-    def learn(self):
+    def learn(self, learn_count=5):
         train_data = self.history
 
         # ニューラルネットワークのトレーニングデータの形に変換
@@ -112,8 +143,10 @@ class QLearning(LogAgent):
         #input_data , output_data = self.change_format_total_score(train_data)
 
         # ニューラルネットワークの学習
-        error_hist = self.mlnn.train_multi(input_data , output_data)
-
+        for i in range(learn_count):
+            error_hist, valid_hist = self.mlnn.train_multi(input_data , output_data)
+            self.train_error += [x[1] for x in error_hist]
+            self.valid_error += [x[1] for x in valid_hist]
         return error_hist
 
     def change_format(self, train_data):
@@ -247,7 +280,10 @@ def test_q_learning():
                 ql_obj.giveReward(0)
             if grid.index(1) in (0,4):
                 break
+        ql_obj.agent_save_episode()
+
     ql_obj.learn()
+    ql_obj.print_experience()
 
     # after train
     data =[[0,0,1,0,0]]

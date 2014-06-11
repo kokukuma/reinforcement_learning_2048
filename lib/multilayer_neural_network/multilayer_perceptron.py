@@ -77,10 +77,11 @@ class MultiLayerNeuralNetwork(BackPropagationLogic, EvaluateError):
         np_rng_output.shuffle(train_data_output)
 
         validate_dataset = {}
-        validate_dataset['input'], train_data_input  = self.split_data(train_data_input, 0.01)
-        validate_dataset['output'],train_data_output = self.split_data(train_data_output, 0.01)
+        validate_dataset['input'], train_data_input  = self.split_data(train_data_input, 0.5)
+        validate_dataset['output'],train_data_output = self.split_data(train_data_output, 0.5)
 
         error_hist        = []
+        valid_error_hist  = []
         self.best_weights = {}
         self.best_error   = None
 
@@ -127,24 +128,27 @@ class MultiLayerNeuralNetwork(BackPropagationLogic, EvaluateError):
             if train_error < self.error_border:
                 break
             error_hist.append((loop_num, train_error))
+            valid_error_hist.append((loop_num, valid_error))
 
             # 誤差表示
             import sys
             if self.print_error:
-                train_error = '\rloop_num:%d , train_error:%f, valid_error:%s' % (loop_num, train_error, valid_error)
+                train_error = '\rloop_num:%d , train_error:%-7.5f, valid_error:%-7.5f' % (loop_num, train_error, valid_error)
                 sys.stdout.write(train_error)
                 sys.stdout.flush()
 
             # 長過ぎたらあきらめる.
             if loop_num>self.epoch_limit:
                 if self.print_error:
-                    print 'out of limit'
+                    #print 'out of limit'
+                    print
+                    pass
                 break
 
-        print self.best_error, self.best_valid_error
+        #print self.best_error, self.best_valid_error
         self.weights = self.best_weights
 
-        return error_hist
+        return error_hist, valid_error_hist
 
     #@profile
 
