@@ -26,11 +26,11 @@ def training(agent, args):
 
     agent.learner._setExplorer(EpsilonGreedyExplorer(epsilon=float(args['learning_epsilon'])))
     for i in range(int(args['total_episodes'])):
-        # show_valuse(agent,[0,1])
-        # show_valuse(agent,[1,0])
+        # show_valuse(agent.module.getValue,[0,1])
+        # show_valuse(agent.module.getValue,[1,0])
         score, turn = play(agent, 'neural', args)
-        # show_valuse(agent,[0,1])
-        # show_valuse(agent,[1,0])
+        # show_valuse(agent.module.getValue,[0,1])
+        # show_valuse(agent.module.getValue,[1,0])
 
         if i % int(args['episodes']) == 0 and not i == 0:
             agent.learn()
@@ -69,10 +69,10 @@ def q_learning_nfq(**args):
         print
         print "==========================="
         print 'before training'
-        print_state(agent)
+        print_state(agent.module.getValue)
         training(agent, args)
         print 'after training'
-        print_state(agent)
+        print_state(agent.module.getValue)
         agent.learner._setExplorer(EpsilonGreedyExplorer(0.3))
 
         score, turn = play(agent, 'neural', args, [2,2])
@@ -107,7 +107,7 @@ def q_learning_nfq(**args):
     print "==========================="
     print 'best score : ', best_score
     print 'best turn : ', best_turn
-    print_state(agent)
+    print_state(agent.module.getValue)
 
 
 
@@ -124,7 +124,7 @@ def q_learning_table():
     turn_list  = []
     # neural側のトレーニング分 +100
     for i in range(600):
-        print_state(agent, 'table')
+        print_state(agent.module.getValue, 'table')
 
         score, turn = play(agent, 'table')
         score_list.append(score)

@@ -62,7 +62,7 @@ def play(agent, normalize_type='neural', args=None, state=None):
         elif normalize_type == 'table':
             observ = convert(state)
         agent.integrateObservation(observ)
-        move, _ = agent.getAction()
+        move = agent.getAction()
 
         #data = api_move(session_id, move[0])
         #print state, move,

@@ -48,12 +48,12 @@ class QLearning(LogAgent):
             self.input_number  = input_number
         self.output_number = output_number
         #self.q_mat = numpy.ones((input_number, output_numbe))
-        self.mlnn = MultiLayerNeuralNetwork( [self.input_number,  10, self.output_number],
+        self.mlnn = MultiLayerNeuralNetwork( [self.input_number,  5, self.output_number],
                                             threshold=0.5,
                                             start_learning_coef=0.1,
                                             sigmoid_alpha=10,
                                             print_error=True,
-                                            mini_batch=50,
+                                            mini_batch=10,
                                             epoch_limit=500,
                                             layer_type=[LinearLayer, SigmoidLayer, LinearLayer],
                                             rprop=True)
@@ -67,7 +67,7 @@ class QLearning(LogAgent):
         self.agent_reward(reward)
         return
 
-    def getAction(self, input_list=None, greedy=True):
+    def getAction(self, input_list=None, greedy=True, q_value=False):
         if input_list == None:
             input_list = self.lastobs
 
@@ -80,8 +80,10 @@ class QLearning(LogAgent):
             q_vaue = max(output_vec)
 
         self.agent_action(action)
-
-        return action, q_vaue
+        if q_value:
+            return action, q_vaue
+        else:
+            return action
 
     def get_q_values(self, input_list, action=None):
         input_mat = numpy.array(input_list)
@@ -130,7 +132,7 @@ class QLearning(LogAgent):
             q_vec = self.get_q_values(_observation)
 
             # 行動後の状態におけるQ値
-            move, q_value = self.getAction(data['observation'])
+            move, q_value = self.getAction(data['observation'], q_value=True)
 
             # 特定の行動のQ値を更新する.
             q_vec[_action]  += self.alpha * (_reward + self.ganmma * q_value  - q_vec[_action])
@@ -185,27 +187,30 @@ class QLearning(LogAgent):
 
 def test_q_learning():
     result = []
-    result.append({'grid':[[0,2], [0,2]], 'action':3, 'point':4})
-    result.append({'grid':[[2,0], [0,4]], 'action':2, 'point':4})
-    result.append({'grid':[[4,4], [0,0]], 'action':0, 'point':8})
+    result.append({'grid':[[0,0,1,0,0]], 'action':0, 'point':0})
+    result.append({'grid':[[0,0,1,0,0]], 'action':1, 'point':0})
+    result.append({'grid':[[0,1,0,0,0]], 'action':0, 'point':1000})
+    result.append({'grid':[[0,1,0,0,0]], 'action':1, 'point':0})
+    result.append({'grid':[[0,0,0,1,0]], 'action':0, 'point':0})
+    result.append({'grid':[[0,0,0,1,0]], 'action':1, 'point':0})
 
     # QLearn obj
-    ql_obj =  QLearning(4, 4, dummy=True)
+    ql_obj =  QLearning(5, 2)
 
     # before train
-    data =[[0,2], [0,2]]
+    data =[[0,0,1,0,0]]
     output_vec= ql_obj.get_q_values(data)
     print output_vec
 
     # train
     for data in result:
         ql_obj.integrateObservation(data['grid'])
-        action = ql_obj.getAction(greedy=True)
+        action = ql_obj.getAction()
         ql_obj.giveReward(data['point'])
-    ql_obj.train(result)
+    ql_obj.learn()
 
     # after train
-    data =[[0,2], [0,2]]
+    data =[[0,0,1,0,0]]
     output_vec= ql_obj.get_q_values(data)
     print output_vec
 
