@@ -1,13 +1,16 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import os
 import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../../')
+
 from pybrain.structure import FeedForwardNetwork, LinearLayer, SigmoidLayer, FullConnection, RecurrentNetwork
 from pybrain.tools.shortcuts import buildNetwork
 from pybrain.datasets import SupervisedDataSet
 from pybrain.supervised.trainers.rprop import RPropMinusTrainer
 
-from get_training_data import liner_training_data,quadratic_function_data, sin_function_data, change_format
+from lib.data_source.get_training_data import liner_training_data,quadratic_function_data, sin_function_data, change_format
 
 def build_network():
     n = FeedForwardNetwork()
@@ -94,7 +97,7 @@ def test_multilayer_perceptron():
     #error_hist = mlnn.train_multi(train_data_input, train_data_output)
     supervised = get_supervised(network, train_data_input, train_data_output)
     trainer = RPropMinusTrainer(network, dataset=supervised, batchlearning=True, verbose=True)
-    trainer.trainUntilConvergence(maxEpochs=500)
+    trainer.trainUntilConvergence(maxEpochs=100)
 
 
     # xに対応するyを算出, 学習後分離線書く

@@ -25,6 +25,7 @@ def training(agent, args):
     print 'each  : ', args['episodes']
 
     agent.learner._setExplorer(EpsilonGreedyExplorer(epsilon=float(args['learning_epsilon'])))
+    agent.module.verbose = True
     for i in range(int(args['total_episodes'])):
         # show_valuse(agent.module.getValue,[0,1])
         # show_valuse(agent.module.getValue,[1,0])

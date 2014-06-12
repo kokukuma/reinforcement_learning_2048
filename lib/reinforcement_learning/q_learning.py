@@ -59,7 +59,7 @@ class LogAgent(object):
         print
         print '## NN train summay'
         print 'average train error : %f' %(numpy.average([x for x in self.train_error]))
-        print 'average valid error : %f' %(numpy.average([x for x in self.train_error]))
+        print 'average valid error : %f' %(numpy.average([x for x in self.valid_error]))
         print
 
 
@@ -82,8 +82,8 @@ class QLearning(LogAgent):
                                             start_learning_coef=0.1,
                                             sigmoid_alpha=10,
                                             print_error=False,
-                                            mini_batch=50,
-                                            epoch_limit=50,
+                                            mini_batch=100,
+                                            epoch_limit=100,
                                             layer_type=[LinearLayer, SigmoidLayer, LinearLayer],
                                             rprop=True)
 

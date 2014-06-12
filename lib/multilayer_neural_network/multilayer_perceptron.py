@@ -113,11 +113,13 @@ class MultiLayerNeuralNetwork(BackPropagationLogic, EvaluateError):
 
             # トレーニングデータでエラーを確認.
             predict_data = self.predict_multi(train_data_input)
-            train_error  = self.get_rss(train_data_output, predict_data)
+            #train_error  = self.get_rss(train_data_output, predict_data)
+            train_error  = self.get_rss(train_data_output, predict_data) /len(train_data_input)
 
             # 検証用データでエラーを確認.
             predict_data = self.predict_multi(validate_dataset['input'])
-            valid_error  = self.get_rss(validate_dataset['output'], predict_data)
+            #valid_error  = self.get_rss(validate_dataset['output'], predict_data)
+            valid_error  = self.get_rss(validate_dataset['output'], predict_data) /len(validate_dataset)
 
             #
             if self.best_error == None or self.best_error > train_error:
@@ -193,15 +195,16 @@ def test_multilayer_perceptron():
                                     start_learning_coef=0.2,
                                     sigmoid_alpha=10,
                                     mini_batch=100,
-                                    layer_type=[LinearLayer, SigmoidLayer, SigmoidLayer],
+                                    epoch_limit=100,
+                                    layer_type=[LinearLayer, SigmoidLayer, LinearLayer],
                                     rprop=True
                                     )
 
     x_range = [0,1]
     y_range = [0,1]
     #liner_data = liner_training_data(x_range, y_range)
-    #liner_data = quadratic_function_data(x_range, y_range, split=20)
-    liner_data = sin_function_data(x_range, y_range, split=20)
+    liner_data = quadratic_function_data(x_range, y_range, split=20)
+    #liner_data = sin_function_data(x_range, y_range, split=20)
     train_data_input, train_data_output = change_format(liner_data)
 
     fig = plt.figure()
@@ -209,7 +212,7 @@ def test_multilayer_perceptron():
     scat(fig, [key for key, value in liner_data.items() if value == 1], color='b' )
 
     # 学習
-    error_hist = mlnn.train_multi(train_data_input, train_data_output)
+    error_hist, _ = mlnn.train_multi(train_data_input, train_data_output)
 
     # xに対応するyを算出, 学習後分離線書く
     data = get_predict_list(x_range,y_range, mlnn, split=20)
