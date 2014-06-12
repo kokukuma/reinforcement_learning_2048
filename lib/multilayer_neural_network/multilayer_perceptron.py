@@ -119,7 +119,7 @@ class MultiLayerNeuralNetwork(BackPropagationLogic, EvaluateError):
             # 検証用データでエラーを確認.
             predict_data = self.predict_multi(validate_dataset['input'])
             #valid_error  = self.get_rss(validate_dataset['output'], predict_data)
-            valid_error  = self.get_rss(validate_dataset['output'], predict_data) /len(validate_dataset)
+            valid_error  = self.get_rss(validate_dataset['output'], predict_data) /len(validate_dataset['input'])
 
             #
             if self.best_error == None or self.best_error > train_error:
