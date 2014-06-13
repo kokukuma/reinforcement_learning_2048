@@ -39,10 +39,10 @@ def training(agent, args):
             agent.reset()
 
         # print
-        sys.stdout.write("\r   episodes:%s" % (i))
-        sys.stdout.flush()
+        # sys.stdout.write("\r   episodes:%s" % (i))
+        # sys.stdout.flush()
 
-    print
+    #print
     agent.print_experience()
     return agent
 
@@ -78,19 +78,27 @@ def q_learning_nfq(**args):
         turn_list.append(turn)
 
         print
+        print 'test one play'
         print i, int(numpy.mean(score_list)) , max(score_list) , score, turn
 
-        if best_score < score or best_turn > turn:
+        if best_agent==None or numpy.average(best_agent.train_error) > numpy.average(agent.train_error):
+            print 'best train error !'
             best_score = score
             best_turn  = turn
             best_agent = agent
+        # if best_score < score or best_turn > turn:
+        #         print 'best train error !'
+        #         best_score = score
+        #         best_turn  = turn
+        #         best_agent = agent
+
         with open(args['path']+'/result.dump', 'w') as f:
             pickle.dump([score_list, turn_list, best_agent], f)
     print
     print "==========================="
     print 'best score : ', best_score
     print 'best turn : ', best_turn
-    print_state(agent)
+    print_state(best_agent.get_q_values)
 
 if __name__ == '__main__':
     import sys

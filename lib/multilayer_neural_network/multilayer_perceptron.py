@@ -91,8 +91,8 @@ class MultiLayerNeuralNetwork(BackPropagationLogic, EvaluateError):
             error_list = []
             loop_num  += 1
 
-            # # シードが同じなので, 同じ形にばらされる.
-            # # あってもなくても. 収束の仕方はかわるが..
+            # シードが同じなので, 同じ形にばらされる.
+            # あってもなくても. 収束の仕方はかわるが..
             np_rng_input.shuffle(train_data_input)
             np_rng_output.shuffle(train_data_output)
 
@@ -125,7 +125,8 @@ class MultiLayerNeuralNetwork(BackPropagationLogic, EvaluateError):
             if self.best_error == None or self.best_error > train_error:
                 self.best_error        = train_error
                 self.best_valid_error  = valid_error
-                self.best_weights = self.weights
+                self.best_epoch        = loop_num
+                self.best_weights      = self.weights
 
             if train_error < self.error_border:
                 break
@@ -147,10 +148,15 @@ class MultiLayerNeuralNetwork(BackPropagationLogic, EvaluateError):
                     pass
                 break
 
-        #print self.best_error, self.best_valid_error
+            # errorが全然変わらなかかったら打ち切り.
+
+
+
+        print self.best_epoch, self.best_error, self.best_valid_error
+        print
         self.weights = self.best_weights
 
-        return error_hist, valid_error_hist
+        return error_hist[:self.best_epoch], valid_error_hist[:self.best_epoch]
 
     #@profile
 

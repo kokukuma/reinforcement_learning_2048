@@ -81,9 +81,9 @@ class QLearning(LogAgent):
                                             threshold=0.5,
                                             start_learning_coef=0.1,
                                             sigmoid_alpha=10,
-                                            print_error=False,
-                                            mini_batch=100,
-                                            epoch_limit=100,
+                                            print_error=True,
+                                            mini_batch=50,
+                                            epoch_limit=50,
                                             layer_type=[LinearLayer, SigmoidLayer, LinearLayer],
                                             rprop=True)
 
@@ -135,7 +135,7 @@ class QLearning(LogAgent):
         self.agent_reset()
         return
 
-    def learn(self, learn_count=5):
+    def learn(self, learn_count=1):
         train_data = self.history
 
         # ニューラルネットワークのトレーニングデータの形に変換
@@ -190,7 +190,6 @@ class QLearning(LogAgent):
         return numpy.array(train_data_input) , numpy.array(train_data_output)
 
     def change_format_old(self, train_data):
-        """pybrain型network用"""
         train_data_input  = []
         train_data_output = []
         lastexperience = None
