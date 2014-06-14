@@ -93,18 +93,18 @@ def main():
 
 
 def print_summary_table(results):
-    print '|%20s|%20s|%20s|' % ('path', 'average score', 'average step')
-    print '|%20s|%20s|%20s|' % ('-' * 20, '-' * 20, '-' * 20)
+    print '|%40s|%20s|%20s|' % ('path', 'average score', 'average step')
+    print '|%40s|%20s|%20s|' % ('-' * 40, '-' * 20, '-' * 20)
 
-    for key, data in results.items():
-        print '|%20s| %8.2f(%8.2f) | %8.2f(%8.2f) |' % (key, data['score_ave'], data['score_std'], data['turn_ave'],data['turn_std'])
+    for key, data in sorted(results.items()):
+        print '|%40s| %8.2f(%8.2f) | %8.2f(%8.2f) |' % (key, data['score_ave'], data['score_std'], data['turn_ave'],data['turn_std'])
     print
 
 def print_agent_data(results):
-    print '|%20s|%20s|%20s|%10s|%10s|' % ('path', 'train data ave-score', 'train data ave-step', 'train err', 'valid err')
-    print '|%20s|%20s|%20s|%10s|%10s|' % ('-' * 20, '-' * 20, '-' * 20, '-' * 10, '-' * 10)
+    print '|%40s|%20s|%20s|%10s|%10s|' % ('path', 'train data ave-score', 'train data ave-step', 'train err', 'valid err')
+    print '|%40s|%20s|%20s|%10s|%10s|' % ('-' * 40, '-' * 20, '-' * 20, '-' * 10, '-' * 10)
 
-    for key, data in results.items():
+    for key, data in sorted(results.items()):
         agent = data['agent']
         turn_list  = []
         score_list = []
@@ -119,7 +119,7 @@ def print_agent_data(results):
         nn_train_error  = numpy.average([x for x in agent.train_error])
         nn_valid_error  = numpy.average([x for x in agent.valid_error])
 
-        print '|%20s| %8.2f(%8.2f) | %8.2f(%8.2f) | %8.2f | %8.2f |' % (key, train_score_ave,
+        print '|%40s| %8.2f(%8.2f) | %8.2f(%8.2f) | %8.2f | %8.2f |' % (key, train_score_ave,
                                                                              train_score_std,
                                                                              train_step_ave,
                                                                              train_step_std,

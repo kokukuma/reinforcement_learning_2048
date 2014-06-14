@@ -1,6 +1,6 @@
 #!/bin/bash
 
-mkdir -p result/base/neural/
+#mkdir -p result/base/neural/
 mkdir -p result/total/200/
 mkdir -p result/total/500/
 
@@ -21,7 +21,7 @@ mkdir -p result/episodes_fixed_learn/50/
 # mkdir -p result/episodes_fixed_learn/200/
 
 # 
-python ./experiment/2d-random-walk/mylib_rl_simple2.py -p ./result/base/neural/
+# python ./experiment/2d-random-walk/mylib_rl_simple2.py -p ./result/base/neural/
 python ./experiment/2d-random-walk/mylib_rl_simple2.py -p ./result/total/200/ -t 200
 python ./experiment/2d-random-walk/mylib_rl_simple2.py -p ./result/total/500/ -t 500
 
