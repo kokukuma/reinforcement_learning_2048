@@ -20,7 +20,7 @@ class GradientDescent(object):
             self.etaplus  = 1.2
             self.etaminus = 0.5
             self.deltamax = 5.0
-            self.deltamin = 0.01
+            self.deltamin = 1.0e-6
             self.lastgradient = None
 
     def __call__(self, weight_mat, deleta_mat, pre_layer_predict_vec):
