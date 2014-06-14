@@ -74,18 +74,21 @@ class QLearning(LogAgent):
         self.input_number  = input_number
         self.output_number = output_number
 
+        from collections import defaultdict
+        self.check_data = defaultdict(list)
+
         #self.q_mat = numpy.ones((input_number, output_numbe))
         #self.mlnn = MultiLayerNeuralNetwork( [self.input_number, 5, self.output_number],
         # pybrain型network
         self.mlnn = MultiLayerNeuralNetwork( [self.input_number+self.output_number, self.input_number+self.output_number , 1],
-                                            threshold=0.5,
+                                            threshold=1,
                                             start_learning_coef=0.1,
-                                            sigmoid_alpha=10,
+                                            sigmoid_alpha=1,
                                             print_error=True,
-                                            mini_batch=50,
-                                            epoch_limit=50,
+                                            mini_batch=20,
+                                            epoch_limit=200,
                                             layer_type=[LinearLayer, SigmoidLayer, LinearLayer],
-                                            rprop=True)
+                                            rprop=False)
 
     def integrateObservation(self, state_vec):
         self.agent_observation(state_vec)
@@ -140,13 +143,40 @@ class QLearning(LogAgent):
 
         # ニューラルネットワークのトレーニングデータの形に変換
         input_data , output_data = self.change_format(train_data)
-        #input_data , output_data = self.change_format_total_score(train_data)
+
+        # # 実験3
+        # r = [{}, {}]
+        # input_list= numpy.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+        # r[0]['input'] = self.convert_input(input_list, 1)
+        # r[1]['input'] = self.convert_input(input_list, 2)
+        # r[0]['before'] = self.mlnn.predict(numpy.array(r[0]['input']).ravel())
+        # r[1]['before'] = self.mlnn.predict(numpy.array(r[1]['input']).ravel())
+
+
+        # # 実験1 教師データの特徴確認.
+        # for i,d in enumerate(input_data):
+        #     self.check_data[tuple(d.tolist())].append(output_data.tolist()[i][0])
+        # print '状態数 : ', len(self.check_data)
+        # for state, points in self.check_data.items():
+        #     if numpy.average(points) > 0:
+        #         print "%s %5d %10.4f, %10.4f " % (state, len(points), numpy.average(points), numpy.std(points) )
 
         # ニューラルネットワークの学習
         for i in range(learn_count):
             error_hist, valid_hist = self.mlnn.train_multi(input_data , output_data)
             self.train_error += [x[1] for x in error_hist]
             self.valid_error += [x[1] for x in valid_hist]
+
+
+        # # 実験3
+        # r[0]['target'] = self.check_data[tuple(numpy.array(r[0]['input']).ravel().tolist())]
+        # r[1]['target'] = self.check_data[tuple(numpy.array(r[1]['input']).ravel().tolist())]
+        # r[0]['after'] = self.mlnn.predict(numpy.array(r[0]['input']).ravel())
+        # r[1]['after'] = self.mlnn.predict(numpy.array(r[1]['input']).ravel())
+        # print 'before : ', r[0]['before'], r[1]['before']
+        # print 'target : ', r[0]['target'], r[1]['target']
+        # print 'after  : ', r[0]['after'], r[1]['after']
+
         return error_hist
 
     def change_format(self, train_data):
@@ -170,6 +200,10 @@ class QLearning(LogAgent):
             for i in range(self.output_number):
                 tmp = self.get_q_values(data['observation'], i)
                 after_q_values.append(tmp)
+
+            # # 実験2
+            # if data['observation'].tolist() == [0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0]:
+            #     print before_q_value,after_q_values
 
             # 特定の行動のQ値を更新する.
             #print self.alpha *(_reward + self.ganmma * max(after_q_values)[0] - before_q_value[0] )
