@@ -41,9 +41,15 @@ reinforcement_learning_2048
 ## 2次元ランダムウォーク
 + Q-learningの検証のため, 簡単なモデルで試す.
 + pybrainで実行してみた結果
-  + [2d-random-walk](docs/2d_random_walk.md)
+  + [2d-random-walk-pybrain](docs/2d_random_walk.md)
   + 実行
-    + ```python experiment/2d-random-walk/pybrain_rl_simple2.py```
+    ```
+    python experiment/2d-random-walk/pybrain_rl_simple2.py -p result/
+    ```
 + mylibで実行してみた結果
+  + [2d-random-walk-mylib](docs/2d_random_walk_mylib.md)
+
+
+
 
 
