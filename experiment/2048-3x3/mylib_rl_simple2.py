@@ -43,16 +43,21 @@ def play(agent):
             data = api_move(session_id, rand_move)
             agent.agent_action(rand_move)
 
-        # その都度報酬を付与するか?
-        # 最後に一気にふよするか?
-        # それとも両方やるか?
-        agent.giveReward(numpy.array([data['points']]))
+        # その都度報酬を付与するか?, 最後に一気にふよするか?, それとも両方やるか?
+        # 1. その都度報酬を付与するか?
+        #agent.giveReward(numpy.array([data['points']]))
 
         turn += 1
         grid = data['grid']
 
         if  data['over']:
+            # 2.最後に一気にふよするか?
+            agent.giveReward(numpy.array([data['score']]))
             break
+        else:
+            agent.giveReward(numpy.array([0]))
+            continue
+
 
     return data['score'], turn
 
@@ -63,6 +68,7 @@ def training(agent, args):
     print 'training...'
     print 'total : ', args['total_episodes']
     print 'each  : ', args['episodes']
+    print 'greed : ', agent.greedy_rate
 
     for i in range(int(args['total_episodes'])):
         score, turn = play(agent)
@@ -73,12 +79,12 @@ def training(agent, args):
             agent.learn()
             agent.reset()
 
-        # print
-        # sys.stdout.write("\r   episodes:%s, turn:%d, score:%d" % (i, turn, score ))
-        # sys.stdout.flush()
+        sys.stdout.write("\r   episodes:%s, turn:%d, score:%d" % (i, turn, score ))
+        sys.stdout.flush()
 
     #print
     agent.print_experience()
+    agent.agent_reset_episode()
     return agent
 
 def q_learning_nfq(**args):
@@ -97,11 +103,11 @@ def q_learning_nfq(**args):
         agent = QLearning(117, 4)
 
         # training
-        agent.greedy_rate   = 0.1
-        for i in range(10):
+        agent.greedy_rate   = 0.5
+        for i in range(100):
             print
-            print "==========================="
-            agent.greedy_rate += 0.05 if agent.greedy_rate < 0.7 else 0.7
+            print "=========================== ", i
+            agent.greedy_rate += 0.05 if agent.greedy_rate < 0.7 else 0.0
             training(agent, args)
         agent.greedy_rate   = 0.7
 
@@ -139,11 +145,11 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Incremental Package List Builder')
     parser.add_argument('-p', '--path', default='./')
-    parser.add_argument('-t', '--total-episodes', default=1000)
+    parser.add_argument('-t', '--total-episodes', default=100)
     parser.add_argument('-r', '--reward', default=1000)
     parser.add_argument('-i', '--init-state-random', default=False)
     parser.add_argument('-l', '--learning-epsilon', default=1.0)
-    parser.add_argument('-e', '--episodes', default=100)
+    parser.add_argument('-e', '--episodes', default=10)
     parser.add_argument('-d', '--decay', default=0.9)
     args = parser.parse_args()
 

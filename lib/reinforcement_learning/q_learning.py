@@ -40,6 +40,9 @@ class LogAgent(object):
         self.episodes.append(self.episode)
         self.episode = []
 
+    def agent_reset_episode(self):
+        self.episodes = []
+
     def print_experience(self):
         """ agentの経験を集計して, summay出すやつ.
             LogAgent classに入れるべきではない気がする.
@@ -84,7 +87,7 @@ class QLearning(LogAgent):
                                             threshold=1,
                                             start_learning_coef=0.02,
                                             sigmoid_alpha=1,
-                                            print_error=True,
+                                            print_error=False,
                                             mini_batch=50,
                                             epoch_limit=50,
                                             layer_type=[LinearLayer, SigmoidLayer, LinearLayer],
@@ -138,7 +141,7 @@ class QLearning(LogAgent):
         self.agent_reset()
         return
 
-    def learn(self, learn_count=1):
+    def learn(self, learn_count=5):
         train_data = self.history
 
         # ニューラルネットワークのトレーニングデータの形に変換
