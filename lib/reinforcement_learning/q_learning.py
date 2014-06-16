@@ -82,7 +82,7 @@ class QLearning(LogAgent):
         # pybrain型network
         self.mlnn = MultiLayerNeuralNetwork( [self.input_number+self.output_number, self.input_number+self.output_number , 1],
                                             threshold=1,
-                                            start_learning_coef=0.05,
+                                            start_learning_coef=0.02,
                                             sigmoid_alpha=1,
                                             print_error=True,
                                             mini_batch=50,
