@@ -50,6 +50,9 @@ reinforcement_learning_2048
   + [2d-random-walk-mylib](docs/2d_random_walk_mylib.md)
 
 
-
+## 2048 - 3x3
++ 2048をちょっと簡単にした3x3でやってみる.
+  + そのままやってみて失敗したときのメモ
+    + [2048_3x3](docs/2048_3x3.md) 
 
 
